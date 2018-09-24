@@ -1,0 +1,43 @@
+# opioid_epidemic.ode
+# Ian Price
+# 2018 - 09 - 22
+
+# Modeling over-doses. Parameters hand-fit to Ohio state-wide data over-dose data 2004 - 2016
+# O prescription Opioid over-doses (numbers per 100,000 population)
+# H Heroin over-doses
+# F Fentanyl over-doses (all)
+
+
+# Assume between 2010 and 2011, the supply of opioids drops dramatically as a function of time.
+par B_O1=136, B_O2=4
+
+B_O(t) =B_O1*heav(2010 - t) + ((B_O2 - B_O1)*(t - 2010) + B_O1)*heav(2011-t)*heav(t-2010) + B_O2*heav(t - 2011)
+
+# The Opioid function grows as a logistic population
+par a_O=0.13 
+
+O'= a_O*O*(1 - O/B_O(t))
+
+# Assume 2 sources of Heroin users, natural growth and users no longer able to get prescription opioids.
+par a_H=0.18, B_H=9, g_OH=0.25
+
+H'= a_H*H*(1 - H/B_H) + g_OH*O*O/B_O(t)
+
+# Assume Fentanyl is primarily driver by a high population of Heroin users as other drugs are laced with Fentanyl
+par a_F=0.01, B_F=0.66, g_HF=0.5
+
+F'= a_F*F*(1 - F/B_F) + g_HF*H*H/B_H
+
+param O_0=2.79
+param H_0=1.08
+param F_0=0.66
+
+global 2004 t {O= O_0; H= H_0; F= F_0}
+
+init O=2.79, H=1.08, F=0.66 
+
+# start in 2014, and project forward to 2020
+@ t0=2004
+@ total=16
+
+done
